@@ -2,6 +2,17 @@
 
 This script integrates with the Licensy Medical Search API to look up medical licenses directly from your Airtable base.
 
+## Quick Start - Which Script Should I Use?
+
+| Your Need | Script to Use | Type |
+|-----------|---------------|------|
+| 🔄 Auto-update when I add new records | `airtable-automation-license-status.js` | Automation |
+| 📅 Daily automatic updates for all records | `airtable-automation-daily-batch.js` | Automation |
+| 👆 Manually look up specific records | `airtable-medical-license-lookup.js` | Manual/Interactive |
+| 🔍 Quick batch lookup of all records | `airtable-medical-license-lookup-simple.js` | Manual/Batch |
+
+**💡 Recommended:** Use the automation scripts for hands-free operation!
+
 ## Overview
 
 The script queries the [Licensy Medical Search API](https://api.medicalsearch.licensy.ai/) using State and License Number fields from your Airtable records and returns the license **Status** (Active/Inactive) along with other detailed medical license information.
@@ -68,6 +79,75 @@ const FIELD_NAMES = {
    - **Single Record**: Process just one record
 3. The script will display progress and results in real-time, showing the **Status** for each license
 4. When prompted, choose "Yes" to save the Status (and optionally full API responses) back to your table
+
+## Automation Setup (Recommended)
+
+For automatic license status updates, use the automation scripts instead of manual execution.
+
+### Available Files
+
+| File | Use Case | Output |
+|------|----------|--------|
+| `airtable-automation-license-status.js` | Triggered when State & License Number are filled | Just the Status value (e.g., "Active") |
+| `airtable-automation-daily-batch.js` | Daily scheduled run for all records | Summary: "Updated X records" |
+| `airtable-medical-license-lookup.js` | Manual interactive script | Full details with user prompts |
+| `airtable-medical-license-lookup-simple.js` | Manual batch processing | All records with full output |
+
+### Option 1: Automatic Status Update (Per Record)
+
+**Triggers when State AND License Number fields are populated**
+
+1. In your Airtable base, click "Automations" (lightning bolt icon)
+2. Click "Create automation"
+3. **Configure Trigger:**
+   - Choose "When record matches conditions"
+   - Table: Your table name
+   - Conditions:
+     - "State" is not empty
+     - AND "License Number" is not empty
+     - AND "Status" is empty (optional, to avoid re-running)
+4. **Add Action:**
+   - Click "+ Add action"
+   - Choose "Run script"
+   - Copy contents of `airtable-automation-license-status.js`
+   - Update table name on line 30
+5. **Configure Input:**
+   - Click "Choose field" for `recordId`
+   - Select "Record ID" from the trigger
+6. **Test & Turn On:**
+   - Click "Test" to verify it works
+   - Toggle automation ON
+
+**Output:** The script outputs only the Status value (e.g., "Active", "Inactive", "Expired")
+
+### Option 2: Daily Batch Update
+
+**Runs once per day to update all records**
+
+1. In your Airtable base, click "Automations"
+2. Click "Create automation"
+3. **Configure Trigger:**
+   - Choose "At a scheduled time"
+   - Frequency: Daily
+   - Time: Choose preferred time (e.g., 2:00 AM)
+4. **Add Action:**
+   - Click "+ Add action"
+   - Choose "Run script"
+   - Copy contents of `airtable-automation-daily-batch.js`
+   - Update table name on line 23
+5. **Test & Turn On:**
+   - Click "Test" to verify
+   - Toggle automation ON
+
+**Output:** Summary message like "Updated 47 records"
+
+### Automation Best Practices
+
+- ✅ Use Option 1 for real-time updates when adding new licenses
+- ✅ Use Option 2 for periodic status refresh of existing licenses
+- ✅ You can use both automations together
+- ✅ Set Status field to empty if you want to re-run the lookup
+- ⚠️ Automations run automatically - no user confirmation needed
 
 ## API Configuration
 
