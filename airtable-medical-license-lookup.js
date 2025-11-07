@@ -2,12 +2,13 @@
  * Airtable Script: Medical License Lookup
  *
  * This script queries the Licensy Medical Search API using State and License Number
- * fields from your Airtable base.
+ * fields from your Airtable base and returns the license Status.
  *
  * Required Fields in your table:
  * - State (Single line text)
  * - License Number (Single line text)
- * - API Response (Long text) - Optional field to store the response
+ * - Status (Single select or Single line text) - Stores license status (Active/Inactive)
+ * - API Response (Long text) - Optional field to store the full response
  *
  * Instructions:
  * 1. Copy this script into Airtable's Scripting app
@@ -29,7 +30,8 @@ const API_CONFIG = {
 const FIELD_NAMES = {
     state: 'State',
     licenseNumber: 'License Number',
-    apiResponse: 'API Response' // Optional: field to store the API response
+    status: 'Status', // Field to store license status (Active/Inactive)
+    apiResponse: 'API Response' // Optional: field to store the full API response
 };
 
 // Main function
@@ -102,16 +104,30 @@ async function main() {
             let result = await lookupLicense(state, licenseNumber);
 
             if (result.success) {
-                output.markdown(`✅ **Success!**`);
+                // Extract status from response
+                let licenseStatus = result.data.Status || 'Unknown';
+
+                output.markdown(`✅ **Success!** Status: **${licenseStatus}**`);
                 output.inspect(result.data);
 
-                // Prepare update if API Response field exists
+                // Prepare update for Status and API Response fields
+                let updateFields = {};
+
+                // Add Status if field exists
+                if (table.fields.find(f => f.name === FIELD_NAMES.status)) {
+                    updateFields[FIELD_NAMES.status] = licenseStatus;
+                }
+
+                // Add API Response if field exists
                 if (table.fields.find(f => f.name === FIELD_NAMES.apiResponse)) {
+                    updateFields[FIELD_NAMES.apiResponse] = JSON.stringify(result.data, null, 2);
+                }
+
+                // Only add to updates if we have fields to update
+                if (Object.keys(updateFields).length > 0) {
                     updates.push({
                         id: record.id,
-                        fields: {
-                            [FIELD_NAMES.apiResponse]: JSON.stringify(result.data, null, 2)
-                        }
+                        fields: updateFields
                     });
                 }
 
@@ -130,10 +146,10 @@ async function main() {
         await sleep(500);
     }
 
-    // Update records if we have an API Response field
+    // Update records if we have Status or API Response fields to update
     if (updates.length > 0) {
         let shouldUpdate = await input.buttonsAsync(
-            `Update ${updates.length} record(s) with API responses?`,
+            `Update ${updates.length} record(s) with Status and API responses?`,
             ['Yes', 'No']
         );
 

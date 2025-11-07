@@ -4,14 +4,16 @@ This script integrates with the Licensy Medical Search API to look up medical li
 
 ## Overview
 
-The script queries the [Licensy Medical Search API](https://api.medicalsearch.licensy.ai/) using State and License Number fields from your Airtable records and retrieves detailed medical license information.
+The script queries the [Licensy Medical Search API](https://api.medicalsearch.licensy.ai/) using State and License Number fields from your Airtable records and returns the license **Status** (Active/Inactive) along with other detailed medical license information.
 
 ## Features
 
+- ✅ **Extracts license Status** (Active/Inactive) from API response
 - ✅ Look up single or multiple medical licenses
 - ✅ Process all records or just selected ones
 - ✅ Automatic error handling and retry logic
-- ✅ Optional storage of API responses in Airtable
+- ✅ Stores Status in Airtable automatically
+- ✅ Optional storage of full API responses in Airtable
 - ✅ Rate limiting protection
 - ✅ Detailed progress reporting
 
@@ -21,13 +23,17 @@ The script queries the [Licensy Medical Search API](https://api.medicalsearch.li
 
 Create a table with at least these fields:
 
-| Field Name | Field Type | Required |
-|------------|------------|----------|
-| State | Single line text | Yes |
-| License Number | Single line text | Yes |
-| API Response | Long text | Optional |
+| Field Name | Field Type | Required | Description |
+|------------|------------|----------|-------------|
+| State | Single line text | Yes | State where license was issued |
+| License Number | Single line text | Yes | Medical license number |
+| Status | Single select or Single line text | Recommended | Stores "Active" or "Inactive" status |
+| API Response | Long text | Optional | Stores full API response data |
 
-**Note:** The "API Response" field is optional but recommended for storing the full API response data.
+**Important Notes:**
+- The **Status** field is highly recommended - this is where the license status will be stored
+- For the Status field, use "Single select" with options: Active, Inactive, Unknown (or just use Single line text)
+- The "API Response" field is optional but useful for storing complete API response data
 
 ### 2. Install the Script
 
@@ -42,12 +48,13 @@ Create a table with at least these fields:
 
 ### 3. Configure Field Names (if different)
 
-If your field names differ from the defaults, update the `FIELD_NAMES` object (lines 22-26):
+If your field names differ from the defaults, update the `FIELD_NAMES` object (lines 30-35):
 
 ```javascript
 const FIELD_NAMES = {
     state: 'Your State Field Name',
     licenseNumber: 'Your License Number Field Name',
+    status: 'Your Status Field Name', // Where license status will be stored
     apiResponse: 'Your Response Field Name' // Optional
 };
 ```
@@ -59,8 +66,8 @@ const FIELD_NAMES = {
    - **Selected Records**: Process specific records you've selected
    - **All Records**: Process every record in the table
    - **Single Record**: Process just one record
-3. The script will display progress and results in real-time
-4. Optionally save the API responses back to your table
+3. The script will display progress and results in real-time, showing the **Status** for each license
+4. When prompted, choose "Yes" to save the Status (and optionally full API responses) back to your table
 
 ## API Configuration
 
@@ -97,20 +104,21 @@ apiKey: 'your_new_api_key_here',
 
 ## API Response Format
 
-The API returns detailed information about medical licenses. Example response:
+The API returns detailed information about medical licenses. Example response for License Number "2143" in "Alabama":
 
 ```json
 {
-  "license_number": "12345",
-  "state": "CA",
-  "status": "Active",
-  "name": "John Doe",
-  "profession": "Medical Doctor",
-  "issue_date": "2015-01-15",
-  "expiration_date": "2025-01-15",
-  // ... additional fields
+  "Full_Name": "Davis, Russell William",
+  "License_Type": "DO",
+  "License_Number": "2143",
+  "Status": "Inactive",
+  "Issued": "1/22/2020",
+  "Expired": "12/31/2022",
+  "State": "Alabama"
 }
 ```
+
+**The script automatically extracts the `Status` field and stores it in your Airtable Status field.**
 
 ## Error Handling
 
@@ -151,17 +159,16 @@ await sleep(1000); // 1 second delay
 
 ### Add additional fields to store
 
-Modify the update object (lines 85-90) to include more fields:
+The script automatically stores the Status field. To store additional fields like Full Name or Expiration Date, modify the update logic (around lines 114-131) to include more fields:
 
 ```javascript
-updates.push({
-    id: record.id,
-    fields: {
-        [FIELD_NAMES.apiResponse]: JSON.stringify(result.data, null, 2),
-        'Status': result.data.status,
-        'Expiration Date': result.data.expiration_date
-    }
-});
+// Add additional fields if they exist in your table
+if (table.fields.find(f => f.name === 'Full Name')) {
+    updateFields['Full Name'] = result.data.Full_Name;
+}
+if (table.fields.find(f => f.name === 'Expired')) {
+    updateFields['Expired'] = result.data.Expired;
+}
 ```
 
 ## Security Notes

@@ -3,6 +3,7 @@
  *
  * Minimal version - processes all records in the current table
  * Required fields: State, License Number
+ * Optional field: Status (to store the license status)
  */
 
 // Configuration
@@ -14,9 +15,14 @@ let table = base.getTable('Medical Licenses'); // Update table name here
 let query = await table.selectRecordsAsync();
 let records = query.records;
 
+// Check if Status field exists
+let hasStatusField = table.fields.find(f => f.name === 'Status');
+
 output.markdown(`# Processing ${records.length} records...\n`);
 
 // Process each record
+let updates = [];
+
 for (let record of records) {
     let state = record.getCellValue('State');
     let licenseNumber = record.getCellValue('License Number');
@@ -44,8 +50,18 @@ for (let record of records) {
 
         if (response.ok) {
             let data = await response.json();
-            output.text('✅ Success');
+            let licenseStatus = data.Status || 'Unknown';
+
+            output.text(`✅ Success - Status: ${licenseStatus}`);
             output.inspect(data);
+
+            // Store for batch update if Status field exists
+            if (hasStatusField) {
+                updates.push({
+                    id: record.id,
+                    fields: { 'Status': licenseStatus }
+                });
+            }
         } else {
             output.text(`❌ Error: ${response.status} ${response.statusText}`);
         }
@@ -56,6 +72,20 @@ for (let record of records) {
 
     // Small delay to avoid rate limiting
     await new Promise(resolve => setTimeout(resolve, 500));
+}
+
+// Update Status field if we have updates
+if (updates.length > 0) {
+    output.text(`\n📝 Updating ${updates.length} records with Status...`);
+
+    // Airtable limits updates to 50 records at a time
+    while (updates.length > 0) {
+        let batch = updates.slice(0, 50);
+        await table.updateRecordsAsync(batch);
+        updates = updates.slice(50);
+    }
+
+    output.text('✅ Status fields updated!');
 }
 
 query.unload();
