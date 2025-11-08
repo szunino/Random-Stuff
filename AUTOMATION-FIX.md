@@ -1,13 +1,15 @@
-# Automation Script Fix - Output Methods
+# Automation Script Fixes - Compatibility Issues
 
-## Issue
-The automation scripts were using `output.text()` which caused the error:
-```
-TypeError: output.text is not a function
-```
+## Issues Fixed
+
+### Issue 1: `output.text is not a function`
+The automation scripts were using `output.text()` which doesn't exist in automations.
+
+### Issue 2: `query.unload is not a function`
+The automation scripts were using `query.unload()` which doesn't exist in automations.
 
 ## Root Cause
-**Airtable Automations vs Scripting Extension** use different output methods:
+**Airtable Automations vs Scripting Extension** use different APIs:
 
 | Method | Scripting Extension | Automation Script |
 |--------|-------------------|-------------------|
@@ -15,28 +17,49 @@ TypeError: output.text is not a function
 | Display markdown | `output.markdown()` ✅ | Not available ❌ |
 | Inspect objects | `output.inspect()` ✅ | `console.log()` ✅ |
 | Set output variables | Not available ❌ | `output.set()` ✅ |
+| Unload query | `query.unload()` ✅ | Not needed ❌ |
 
-## Fix Applied
+## Fixes Applied
 
-### Before (causing error):
+### Fix 1: Output Methods
+
+**Before (causing error):**
 ```javascript
 output.text('Status: Active');
 ```
 
-### After (works in automations):
+**After (works in automations):**
 ```javascript
 console.log('Status: Active');
 output.set('status', 'Active'); // Makes variable available to next automation step
 ```
 
+### Fix 2: Query Unload
+
+**Before (causing error):**
+```javascript
+let query = await table.selectRecordsAsync();
+// ... use query ...
+query.unload();  // Error in automations!
+```
+
+**After (works in automations):**
+```javascript
+let query = await table.selectRecordsAsync();
+// ... use query ...
+// No unload needed in automations
+```
+
 ## Updated Files
 
 1. **airtable-automation-license-status.js**
-   - Changed `output.text()` to `console.log()`
+   - Removed 3 instances of `query.unload()`
+   - Changed all `output.text()` to `console.log()`
    - Added `output.set('status', statusValue)` for subsequent automation steps
 
 2. **airtable-automation-daily-batch.js**
-   - Changed `output.text()` to `console.log()`
+   - Removed 1 instance of `query.unload()`
+   - Changed all `output.text()` to `console.log()`
    - Added `output.set('recordsUpdated', count)` and `output.set('summary', message)`
 
 ## How to Use Output Variables
@@ -72,10 +95,23 @@ To see `console.log()` output:
 | Testing (Scripting extension) | ✅ Yes | ✅ Yes (also works) | ❌ No |
 | Automation (Production) | ❌ No (error) | ✅ Yes | ✅ Yes |
 
-## Summary
+## Summary of All Changes
 
 ✅ **Fixed:** Replaced `output.text()` with `console.log()`
+✅ **Fixed:** Removed all `query.unload()` calls
 ✅ **Added:** `output.set()` for passing data to next automation steps
-✅ **Ready:** Both automation scripts now work correctly
+✅ **Ready:** Both automation scripts now work correctly in Airtable automations
+
+## Scripts Updated
+
+1. **airtable-automation-license-status.js**
+   - Removed 3 instances of `query.unload()`
+   - Changed all `output.text()` to `console.log()`
+   - Added `output.set('status', value)`
+
+2. **airtable-automation-daily-batch.js**
+   - Removed 1 instance of `query.unload()`
+   - Changed all `output.text()` to `console.log()`
+   - Added `output.set('recordsUpdated', count)` and `output.set('summary', message)`
 
 The automation scripts will now run without errors!

@@ -41,7 +41,6 @@ let record = query.records.find(r => r.id === recordId);
 
 if (!record) {
     console.log('Record not found');
-    query.unload();
 } else {
     let state = record.getCellValue('State');
     let licenseNumber = record.getCellValue('License Number');
@@ -49,7 +48,6 @@ if (!record) {
     // Validate required fields
     if (!state || !licenseNumber) {
         console.log('Missing required fields');
-        query.unload();
     } else {
         try {
             // Build API request
@@ -89,7 +87,5 @@ if (!record) {
             console.log(`Error: ${error.message}`);
             output.set('status', 'Error');
         }
-
-        query.unload();
     }
 }

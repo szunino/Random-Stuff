@@ -89,8 +89,6 @@ while (updates.length > 0) {
     updates = updates.slice(50);
 }
 
-query.unload();
-
 // Log summary
 console.log(`Updated ${statusResults.length} records`);
 
