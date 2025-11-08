@@ -4,18 +4,22 @@
  * This script processes multiple records and updates their Status fields.
  * Designed for daily scheduled automations.
  *
- * Output: Comma-separated list of statuses or summary
- *
  * Required Fields:
  * - State (Single line text)
  * - License Number (Single line text)
  * - Status (Single select or Single line text)
+ *
+ * Output Variables (accessible in subsequent automation steps):
+ * - recordsUpdated: Number of records updated (e.g., 47)
+ * - summary: Summary message (e.g., "Updated 47 records")
  *
  * Setup Instructions:
  * 1. Create an automation in Airtable
  * 2. Trigger: "At a scheduled time" (daily)
  * 3. Action: "Run a script"
  * 4. Paste this script
+ * 5. Update table name on line 26 if needed
+ * 6. (Optional) Add subsequent steps that use output variables
  */
 
 // Configuration
@@ -87,5 +91,9 @@ while (updates.length > 0) {
 
 query.unload();
 
-// Output summary
-output.text(`Updated ${statusResults.length} records`);
+// Log summary
+console.log(`Updated ${statusResults.length} records`);
+
+// Set output variable for use in subsequent automation steps
+output.set('recordsUpdated', statusResults.length);
+output.set('summary', `Updated ${statusResults.length} records`);
