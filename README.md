@@ -2,16 +2,28 @@
 
 This script integrates with the Licensy Medical Search API to look up medical licenses directly from your Airtable base.
 
+## 🧪 First Time? Test the API First!
+
+**New users:** Start with the testing scripts to verify everything works!
+
+| Script | Purpose |
+|--------|---------|
+| `airtable-test-extension.js` | Quick test - no table needed |
+| `airtable-test-with-table.js` | Test with your actual table |
+
+👉 **[See TESTING.md for complete testing guide](TESTING.md)**
+
 ## Quick Start - Which Script Should I Use?
 
 | Your Need | Script to Use | Type |
 |-----------|---------------|------|
+| 🧪 Test the API first | `airtable-test-extension.js` or `airtable-test-with-table.js` | Testing |
 | 🔄 Auto-update when I add new records | `airtable-automation-license-status.js` | Automation |
 | 📅 Daily automatic updates for all records | `airtable-automation-daily-batch.js` | Automation |
 | 👆 Manually look up specific records | `airtable-medical-license-lookup.js` | Manual/Interactive |
 | 🔍 Quick batch lookup of all records | `airtable-medical-license-lookup-simple.js` | Manual/Batch |
 
-**💡 Recommended:** Use the automation scripts for hands-free operation!
+**💡 Recommended:** Test first, then use the automation scripts for hands-free operation!
 
 ## Overview
 
