@@ -50,7 +50,8 @@ for (let record of records) {
         // Build API request
         let payload = `License_Number=${encodeURIComponent(licenseNumber)}&State=${encodeURIComponent(state)}&credential_key=${API_KEY}`;
 
-        // Call API
+        // Call API using Airtable's remoteFetchAsync function
+        // @ts-ignore - remoteFetchAsync is provided by Airtable automation environment
         let response = await remoteFetchAsync(API_URL, {
             method: 'POST',
             headers: {

@@ -28,9 +28,10 @@
 const API_URL = 'https://api.medicalsearch.licensy.ai/api/v1/medical/search-license-by-number/';
 const API_KEY = 'ck_75ea45bff92f02dc0560c640e727f2e7';
 
-// Get input configuration from automation
+// Get input configuration from automation trigger
+// The recordId is passed from the trigger step
 let inputConfig = input.config();
-let recordId = inputConfig.recordId;
+let recordId = inputConfig['recordId'];
 
 // Get the table
 let table = base.getTable('Medical Licenses'); // Change to your table name
@@ -53,7 +54,8 @@ if (!record) {
             // Build API request
             let payload = `License_Number=${encodeURIComponent(licenseNumber)}&State=${encodeURIComponent(state)}&credential_key=${API_KEY}`;
 
-            // Call API
+            // Call API using Airtable's remoteFetchAsync function
+            // @ts-ignore - remoteFetchAsync is provided by Airtable automation environment
             let response = await remoteFetchAsync(API_URL, {
                 method: 'POST',
                 headers: {
