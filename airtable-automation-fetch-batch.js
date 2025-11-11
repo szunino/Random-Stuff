@@ -21,8 +21,15 @@
 // Configuration
 const API_URL = 'https://api.medicalsearch.licensy.ai/api/v1/medical/search-license-by-number/';
 const API_KEY = 'ck_75ea45bff92f02dc0560c640e727f2e7';
-const DELAY_BETWEEN_REQUESTS = 500; // milliseconds (to avoid rate limiting)
 const MAX_RECORDS_PER_RUN = 50; // Safety limit
+
+// Simple sleep function for Airtable (setTimeout not available)
+function sleep(ms) {
+    const start = Date.now();
+    while (Date.now() - start < ms) {
+        // Busy wait
+    }
+}
 
 // Get the table
 let table = base.getTable('Licenses'); // ✏️ UPDATE THIS to match your table name
@@ -104,9 +111,9 @@ if (recordsToProcess.length === 0) {
             failureCount++;
         }
 
-        // Add delay between requests to avoid rate limiting
+        // Add delay between requests to avoid rate limiting (500ms)
         if (processedCount < recordsToProcess.length) {
-            await new Promise(resolve => setTimeout(resolve, DELAY_BETWEEN_REQUESTS));
+            sleep(500);
         }
     }
 
