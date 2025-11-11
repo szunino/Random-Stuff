@@ -23,7 +23,7 @@ console.log('=== DEBUG MODE ENABLED ===');
 console.log('Starting script execution...');
 
 // Get the table
-let table = base.getTable('Medical Licenses'); // Change to your table name
+let table = base.getTable('Licenses'); // ✏️ IMPORTANT: Change this to match your table name exactly!
 console.log(`✅ Table found: ${table.name}`);
 
 // Check table fields

@@ -20,7 +20,7 @@ const API_URL = 'https://api.medicalsearch.licensy.ai/api/v1/medical/search-lice
 const API_KEY = 'ck_75ea45bff92f02dc0560c640e727f2e7';
 
 // Get the table
-let table = base.getTable('Medical Licenses'); // Change to your table name
+let table = base.getTable('Licenses'); // ✏️ IMPORTANT: Change this to match your table name exactly!
 
 console.log('Looking for records to process...');
 
