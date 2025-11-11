@@ -29,9 +29,14 @@ const API_URL = 'https://api.medicalsearch.licensy.ai/api/v1/medical/search-lice
 const API_KEY = 'ck_75ea45bff92f02dc0560c640e727f2e7';
 
 // Get input configuration from automation trigger
-// The recordId is passed from the trigger step
+// IMPORTANT: In the automation UI, you must configure the input variable:
+// Click on "recordId" field and select "Record ID" from the trigger step
 let inputConfig = input.config();
 let recordId = inputConfig['recordId'];
+
+// Debug logging
+console.log(`Input config received:`, inputConfig);
+console.log(`Record ID: ${recordId}`);
 
 // Get the table
 let table = base.getTable('Medical Licenses'); // Change to your table name
