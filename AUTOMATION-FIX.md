@@ -1,5 +1,7 @@
 # Automation Script Fixes - Compatibility Issues
 
+> **📖 For a complete guide on environment compatibility, see [ENVIRONMENT-COMPATIBILITY.md](ENVIRONMENT-COMPATIBILITY.md)**
+
 ## Issues Fixed
 
 ### Issue 1: `output.text is not a function`
@@ -159,3 +161,24 @@ To see `console.log()` output:
 - **These are environment-specific**: These fixes are needed because Airtable's automation environment has global functions that aren't in standard TypeScript definitions
 
 The automation scripts will now run without errors!
+
+## Update: Environment Compatibility (January 2025)
+
+### New Issue: remoteFetchAsync Not Available
+
+Some Airtable environments don't have `remoteFetchAsync` but do have standard `fetch()` API.
+
+**Solution:** Use `airtable-automation-fetch-version.js`
+
+This version:
+- ✅ Uses standard `fetch()` instead of `remoteFetchAsync`
+- ✅ Works in modern Airtable environments
+- ✅ No input configuration needed
+- ✅ Same functionality as the other automation scripts
+
+**How to check your environment:**
+1. Run `airtable-diagnostic-check.js` in an automation
+2. It will tell you which HTTP function is available
+3. Use the appropriate script version
+
+**See [ENVIRONMENT-COMPATIBILITY.md](ENVIRONMENT-COMPATIBILITY.md) for complete details.**

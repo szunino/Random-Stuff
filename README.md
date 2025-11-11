@@ -2,12 +2,27 @@
 
 This script integrates with the Licensy Medical Search API to look up medical licenses directly from your Airtable base.
 
-## 🧪 First Time? Test the API First!
+## 🧪 First Time? Run the Diagnostic!
 
-**New users:** Start with the testing scripts to verify everything works!
+**IMPORTANT:** Before using any automation script, run the diagnostic to check your environment:
+
+1. In your Airtable automation, create a test automation
+2. Add "Run a script" action
+3. Copy and paste `airtable-diagnostic-check.js`
+4. Run it and note the recommendation
+
+The diagnostic will tell you:
+- ✅ Whether `remoteFetchAsync` is available
+- ✅ Whether `fetch()` is available
+- ✅ Which script version to use
+
+### Testing the API
+
+**New users:** After running the diagnostic, test the API to verify everything works!
 
 | Script | Purpose |
 |--------|---------|
+| `airtable-diagnostic-check.js` | **Run this first!** - Check your environment |
 | `airtable-test-extension.js` | Quick test - no table needed |
 | `airtable-test-with-table.js` | Test with your actual table |
 
@@ -17,13 +32,26 @@ This script integrates with the Licensy Medical Search API to look up medical li
 
 | Your Need | Script to Use | Type |
 |-----------|---------------|------|
+| 🔍 **Check environment first** | `airtable-diagnostic-check.js` | **Diagnostic** |
 | 🧪 Test the API first | `airtable-test-extension.js` or `airtable-test-with-table.js` | Testing |
-| 🔄 Auto-update when I add new records | `airtable-automation-license-status.js` | Automation |
+| 🔄 Auto-update when I add new records | See automation options below ⬇️ | Automation |
 | 📅 Daily automatic updates for all records | `airtable-automation-daily-batch.js` | Automation |
 | 👆 Manually look up specific records | `airtable-medical-license-lookup.js` | Manual/Interactive |
 | 🔍 Quick batch lookup of all records | `airtable-medical-license-lookup-simple.js` | Manual/Batch |
 
-**💡 Recommended:** Test first, then use the automation scripts for hands-free operation!
+### 🤖 Automation Scripts - Choose Based on Your Environment
+
+**After running the diagnostic, use the appropriate version:**
+
+| If Diagnostic Says | Script to Use | Notes |
+|-------------------|---------------|-------|
+| ✅ remoteFetchAsync available | `airtable-automation-license-status.js` | Standard version |
+| ✅ fetch available (no remoteFetchAsync) | `airtable-automation-fetch-version.js` | **Use this if remoteFetchAsync fails** |
+| ❌ Neither available | Contact Airtable support | HTTP requests not supported |
+
+**Alternative:** `airtable-automation-simple-trigger.js` - No input configuration needed, but requires `remoteFetchAsync`
+
+**💡 Recommended:** Run diagnostic first, test the API, then use the appropriate automation script for hands-free operation!
 
 ## Overview
 
@@ -98,12 +126,17 @@ For automatic license status updates, use the automation scripts instead of manu
 
 ### Available Files
 
-| File | Use Case | Output |
-|------|----------|--------|
-| `airtable-automation-license-status.js` | Triggered when State & License Number are filled | Just the Status value (e.g., "Active") |
-| `airtable-automation-daily-batch.js` | Daily scheduled run for all records | Summary: "Updated X records" |
-| `airtable-medical-license-lookup.js` | Manual interactive script | Full details with user prompts |
-| `airtable-medical-license-lookup-simple.js` | Manual batch processing | All records with full output |
+| File | Use Case | Requires | Output |
+|------|----------|----------|--------|
+| `airtable-diagnostic-check.js` | Check which HTTP functions are available | Nothing | Environment report |
+| `airtable-automation-fetch-version.js` | Auto-update per record (uses fetch) | `fetch()` | Status value |
+| `airtable-automation-simple-trigger.js` | Auto-update per record (no input config) | `remoteFetchAsync` | Status value |
+| `airtable-automation-license-status.js` | Auto-update per record (with input config) | `remoteFetchAsync` | Status value |
+| `airtable-automation-daily-batch.js` | Daily scheduled run for all records | `remoteFetchAsync` | Summary message |
+| `airtable-medical-license-lookup.js` | Manual interactive script | `remoteFetchAsync` | Full details |
+| `airtable-medical-license-lookup-simple.js` | Manual batch processing | `remoteFetchAsync` | All records |
+
+**💡 Pro Tip:** If you see `remoteFetchAsync is not defined` errors, use `airtable-automation-fetch-version.js` instead!
 
 ### Option 1: Automatic Status Update (Per Record)
 
@@ -121,16 +154,22 @@ For automatic license status updates, use the automation scripts instead of manu
 4. **Add Action:**
    - Click "+ Add action"
    - Choose "Run script"
-   - Copy contents of `airtable-automation-license-status.js`
-   - Update table name on line 30
-5. **Configure Input:**
+   - **Choose the script based on your environment:**
+     - **If `remoteFetchAsync` works:** Use `airtable-automation-license-status.js` (requires input config)
+     - **If `remoteFetchAsync` fails:** Use `airtable-automation-fetch-version.js` (no input config needed)
+     - **Alternative:** Use `airtable-automation-simple-trigger.js` (no input config, uses remoteFetchAsync)
+   - Update table name (line 23 or 30 depending on script)
+5. **Configure Input (only for airtable-automation-license-status.js):**
    - Click "Choose field" for `recordId`
    - Select "Record ID" from the trigger
+   - **Skip this step if using fetch-version or simple-trigger**
 6. **Test & Turn On:**
    - Click "Test" to verify it works
    - Toggle automation ON
 
 **Output:** The script outputs only the Status value (e.g., "Active", "Inactive", "Expired")
+
+**⚠️ Troubleshooting:** If you see `remoteFetchAsync is not defined`, use `airtable-automation-fetch-version.js` instead!
 
 ### Option 2: Daily Batch Update
 
@@ -223,12 +262,27 @@ The script includes comprehensive error handling:
 
 ## Troubleshooting
 
+> **📖 For detailed environment compatibility information, see [ENVIRONMENT-COMPATIBILITY.md](ENVIRONMENT-COMPATIBILITY.md)**
+
+### ❌ "remoteFetchAsync is not defined" error
+
+**This is a common issue in some Airtable environments!**
+
+**Solution:**
+1. Run `airtable-diagnostic-check.js` to confirm the issue
+2. Use `airtable-automation-fetch-version.js` instead
+3. This version uses standard `fetch()` which works in all modern Airtable environments
+
+**Why this happens:** Airtable is transitioning from `remoteFetchAsync` to standard `fetch()` API. Some environments have one but not the other.
+
+**📖 See [ENVIRONMENT-COMPATIBILITY.md](ENVIRONMENT-COMPATIBILITY.md) for a complete guide with decision trees and migration instructions.**
+
 ### "Field not found" error
 - Verify your field names match those in the `FIELD_NAMES` configuration
 - Check that fields exist in your table
 
 ### "Table not found" error
-- Update the table name on line 33 to match your table's name exactly
+- Update the table name (line 23 or 30) to match your table's name exactly
 
 ### API returns errors
 - Verify the license number and state are valid
@@ -238,6 +292,11 @@ The script includes comprehensive error handling:
 ### Rate limiting
 - The script includes a 500ms delay between requests
 - For large batches, consider processing in smaller groups
+
+### Script runs but nothing happens
+- Check the automation run history for console.log output
+- Verify that records have both State and License Number filled
+- Ensure Status field is empty (if using that as a trigger condition)
 
 ## Advanced Customization
 
