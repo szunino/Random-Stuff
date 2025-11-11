@@ -59,11 +59,15 @@ The script queries the [Licensy Medical Search API](https://api.medicalsearch.li
 
 ## Features
 
-- ✅ **Extracts license Status** (Active/Inactive) from API response
+- ✅ **Automatically fills 4 key fields** from API response:
+  - **Status** (Active/Inactive/Expired)
+  - **Date Issued** (when license was issued)
+  - **Date Expires** (expiration date)
+  - **License Type** (DO, MD, etc.)
 - ✅ Look up single or multiple medical licenses
 - ✅ Process all records or just selected ones
 - ✅ Automatic error handling and retry logic
-- ✅ Stores Status in Airtable automatically
+- ✅ Smart date parsing (converts M/D/YYYY to YYYY-MM-DD)
 - ✅ Optional storage of full API responses in Airtable
 - ✅ Rate limiting protection
 - ✅ Detailed progress reporting
@@ -76,14 +80,19 @@ Create a table with at least these fields:
 
 | Field Name | Field Type | Required | Description |
 |------------|------------|----------|-------------|
-| State | Single line text | Yes | State where license was issued |
-| License Number | Single line text | Yes | Medical license number |
-| Status | Single select or Single line text | Recommended | Stores "Active" or "Inactive" status |
+| State | Single line text | **Required** | State where license was issued (input) |
+| License Number | Single line text | **Required** | Medical license number (input) |
+| Status | Single select or Single line text | **Auto-filled** ✨ | License status (Active, Inactive, Expired, etc.) |
+| Date Issued | Date | **Auto-filled** ✨ | When the license was issued |
+| Date Expires | Date | **Auto-filled** ✨ | When the license expires |
+| License Type | Single line text | **Auto-filled** ✨ | Type of license (DO, MD, etc.) |
 | API Response | Long text | Optional | Stores full API response data |
 
 **Important Notes:**
-- The **Status** field is highly recommended - this is where the license status will be stored
-- For the Status field, use "Single select" with options: Active, Inactive, Unknown (or just use Single line text)
+- **You only need to fill in:** State and License Number
+- **Scripts automatically fill:** Status, Date Issued, Date Expires, License Type
+- For the Status field, use "Single select" with options: Active, Inactive, Expired, Unknown (or just use Single line text)
+- Date fields must be set to "Date" field type in Airtable
 - The "API Response" field is optional but useful for storing complete API response data
 
 ### 2. Install the Script
@@ -245,16 +254,20 @@ The API returns detailed information about medical licenses. Example response fo
 ```json
 {
   "Full_Name": "Davis, Russell William",
-  "License_Type": "DO",
+  "License_Type": "DO",          ← Auto-filled to "License Type"
   "License_Number": "2143",
-  "Status": "Inactive",
-  "Issued": "1/22/2020",
-  "Expired": "12/31/2022",
+  "Status": "Inactive",           ← Auto-filled to "Status"
+  "Issued": "1/22/2020",          ← Auto-filled to "Date Issued" (as 2020-01-22)
+  "Expired": "12/31/2022",        ← Auto-filled to "Date Expires" (as 2022-12-31)
   "State": "Alabama"
 }
 ```
 
-**The script automatically extracts the `Status` field and stores it in your Airtable Status field.**
+**The scripts automatically extract and store these fields in your Airtable:**
+- ✅ **Status** → Status field
+- ✅ **License_Type** → License Type field
+- ✅ **Issued** → Date Issued field (converted to YYYY-MM-DD format)
+- ✅ **Expired** → Date Expires field (converted to YYYY-MM-DD format)
 
 ## Error Handling
 
