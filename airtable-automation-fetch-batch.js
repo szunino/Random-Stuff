@@ -31,6 +31,26 @@ function sleep(ms) {
     }
 }
 
+// Helper function to parse dates from API format (M/D/YYYY) to Airtable format (YYYY-MM-DD)
+function parseDate(dateString) {
+    if (!dateString) return null;
+
+    try {
+        // API returns dates like "1/22/2020" or "12/31/2022"
+        let parts = dateString.split('/');
+        if (parts.length === 3) {
+            let month = parts[0].padStart(2, '0');
+            let day = parts[1].padStart(2, '0');
+            let year = parts[2];
+            return `${year}-${month}-${day}`;
+        }
+    } catch (e) {
+        console.log(`    ⚠️ Could not parse date: ${dateString}`);
+    }
+
+    return null;
+}
+
 // Get the table
 let table = base.getTable('Licenses'); // ✏️ UPDATE THIS to match your table name
 
@@ -94,10 +114,27 @@ if (recordsToProcess.length === 0) {
 
                 console.log(`  ✅ Status: ${status}`);
 
-                // Update the Status field
-                await table.updateRecordAsync(record.id, {
+                // Parse dates from API response
+                let dateIssued = parseDate(data.Issued);
+                let dateExpires = parseDate(data.Expired);
+                let licenseType = data.License_Type || null;
+
+                // Log additional fields
+                if (licenseType) console.log(`     License Type: ${licenseType}`);
+                if (dateIssued) console.log(`     Issued: ${dateIssued}`);
+                if (dateExpires) console.log(`     Expires: ${dateExpires}`);
+
+                // Build update object with all fields
+                let updateFields = {
                     'Status': status
-                });
+                };
+
+                if (licenseType) updateFields['License Type'] = licenseType;
+                if (dateIssued) updateFields['Date Issued'] = dateIssued;
+                if (dateExpires) updateFields['Date Expires'] = dateExpires;
+
+                // Update the record with all available fields
+                await table.updateRecordAsync(record.id, updateFields);
 
                 successCount++;
 

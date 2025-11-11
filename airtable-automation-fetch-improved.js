@@ -27,6 +27,23 @@
 const API_URL = 'https://api.medicalsearch.licensy.ai/api/v1/medical/search-license-by-number/';
 const API_KEY = 'ck_75ea45bff92f02dc0560c640e727f2e7';
 
+// Helper function to parse dates from API format (M/D/YYYY) to Airtable format (YYYY-MM-DD)
+function parseDate(dateString) {
+    if (!dateString) return null;
+    try {
+        let parts = dateString.split('/');
+        if (parts.length === 3) {
+            let month = parts[0].padStart(2, '0');
+            let day = parts[1].padStart(2, '0');
+            let year = parts[2];
+            return `${year}-${month}-${day}`;
+        }
+    } catch (e) {
+        console.log(`⚠️ Could not parse date: ${dateString}`);
+    }
+    return null;
+}
+
 // Get the table
 let table = base.getTable('Licenses'); // ✏️ IMPORTANT: Change this to match your table name exactly!
 
@@ -124,11 +141,28 @@ if (recordsToProcess.length === 0) {
 
             console.log(`Writing Status: "${status}"`);
 
+            // Parse dates from API response
+            let dateIssued = parseDate(data.Issued);
+            let dateExpires = parseDate(data.Expired);
+            let licenseType = data.License_Type || null;
+
+            // Log additional fields
+            if (licenseType) console.log(`License Type: ${licenseType}`);
+            if (dateIssued) console.log(`Date Issued: ${dateIssued}`);
+            if (dateExpires) console.log(`Date Expires: ${dateExpires}`);
+
             try {
-                // Update the Status field
-                await table.updateRecordAsync(record.id, {
+                // Build update object with all fields
+                let updateFields = {
                     'Status': status
-                });
+                };
+
+                if (licenseType) updateFields['License Type'] = licenseType;
+                if (dateIssued) updateFields['Date Issued'] = dateIssued;
+                if (dateExpires) updateFields['Date Expires'] = dateExpires;
+
+                // Update the record with all available fields
+                await table.updateRecordAsync(record.id, updateFields);
 
                 console.log('✅ Record updated successfully');
 
