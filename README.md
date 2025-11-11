@@ -130,13 +130,18 @@ For automatic license status updates, use the automation scripts instead of manu
 |------|----------|----------|--------|
 | `airtable-diagnostic-check.js` | Check which HTTP functions are available | Nothing | Environment report |
 | `airtable-automation-fetch-version.js` | Auto-update per record (uses fetch) | `fetch()` | Status value |
+| `airtable-automation-fetch-improved.js` | Auto-update with better Single Select handling | `fetch()` | Status value |
+| `airtable-automation-fetch-debug.js` | **Debug version** - Extensive logging | `fetch()` | Status value + logs |
 | `airtable-automation-simple-trigger.js` | Auto-update per record (no input config) | `remoteFetchAsync` | Status value |
 | `airtable-automation-license-status.js` | Auto-update per record (with input config) | `remoteFetchAsync` | Status value |
 | `airtable-automation-daily-batch.js` | Daily scheduled run for all records | `remoteFetchAsync` | Summary message |
 | `airtable-medical-license-lookup.js` | Manual interactive script | `remoteFetchAsync` | Full details |
 | `airtable-medical-license-lookup-simple.js` | Manual batch processing | `remoteFetchAsync` | All records |
 
-**💡 Pro Tip:** If you see `remoteFetchAsync is not defined` errors, use `airtable-automation-fetch-version.js` instead!
+**💡 Pro Tips:**
+- If you see `remoteFetchAsync is not defined` errors, use `airtable-automation-fetch-version.js`
+- **If Status isn't being written to cells**, use `airtable-automation-fetch-debug.js` to diagnose the issue
+- See **[STATUS-NOT-WRITING-TROUBLESHOOTING.md](STATUS-NOT-WRITING-TROUBLESHOOTING.md)** for detailed troubleshooting
 
 ### Option 1: Automatic Status Update (Per Record)
 
@@ -262,7 +267,23 @@ The script includes comprehensive error handling:
 
 ## Troubleshooting
 
-> **📖 For detailed environment compatibility information, see [ENVIRONMENT-COMPATIBILITY.md](ENVIRONMENT-COMPATIBILITY.md)**
+> **📖 Quick Links:**
+> - [ENVIRONMENT-COMPATIBILITY.md](ENVIRONMENT-COMPATIBILITY.md) - Environment compatibility guide
+> - **[STATUS-NOT-WRITING-TROUBLESHOOTING.md](STATUS-NOT-WRITING-TROUBLESHOOTING.md)** - Status field not updating? Read this!
+
+### ❌ Status not being written to cell
+
+**This is a common issue! The automation runs but the Status field stays empty.**
+
+**Solution:**
+1. Use `airtable-automation-fetch-debug.js` to see detailed logs
+2. Check if Status field is Single Select - options must match exactly
+3. See **[STATUS-NOT-WRITING-TROUBLESHOOTING.md](STATUS-NOT-WRITING-TROUBLESHOOTING.md)** for complete diagnosis steps
+
+**Common causes:**
+- Single Select field options don't match API values (e.g., "Active" vs "ACTIVE")
+- Field name isn't exactly "Status"
+- Field permissions or table access issues
 
 ### ❌ "remoteFetchAsync is not defined" error
 
