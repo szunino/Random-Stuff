@@ -115,10 +115,10 @@ if (recordsToProcess.length === 0) {
             if (statusField && String(statusField.type) === 'singleSelect') {
                 console.log('Status field is Single Select');
 
-                // Get valid options (type assertion for options property)
-                const fieldOptions = (statusField as any).options;
+                // Get valid options
+                const fieldOptions = statusField.options;
                 if (fieldOptions && fieldOptions.choices) {
-                    let validOptions = fieldOptions.choices.map((c: any) => c.name);
+                    let validOptions = fieldOptions.choices.map(c => c.name);
                     console.log('Valid options:', validOptions.join(', '));
 
                     // Check if status value is valid
@@ -127,7 +127,7 @@ if (recordsToProcess.length === 0) {
 
                         // Try to find a matching option (case-insensitive)
                         let matchingOption = validOptions.find(
-                            (opt: string) => opt.toLowerCase() === status.toLowerCase()
+                            opt => opt.toLowerCase() === status.toLowerCase()
                         );
 
                         if (matchingOption) {
