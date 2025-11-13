@@ -117,7 +117,7 @@ if (recordsToProcess.length === 0) {
 
                 // Get valid options
                 const fieldOptions = statusField.options;
-                if (fieldOptions && fieldOptions.choices) {
+                if (fieldOptions && fieldOptions.choices && Array.isArray(fieldOptions.choices)) {
                     let validOptions = fieldOptions.choices.map(c => c.name);
                     console.log('Valid options:', validOptions.join(', '));
 
