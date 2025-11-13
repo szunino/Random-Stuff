@@ -19,6 +19,15 @@
 const API_URL = 'https://api.medicalsearch.licensy.ai/api/v1/medical/search-license-by-number/';
 const API_KEY = 'ck_75ea45bff92f02dc0560c640e727f2e7';
 
+// Get today's date in YYYY-MM-DD format
+function getTodayDate() {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+}
+
 console.log('=== DEBUG MODE ENABLED ===');
 console.log('Starting script execution...');
 
@@ -140,14 +149,21 @@ if (recordsToProcess.length === 0) {
 
             console.log('\n💾 Attempting to update record...');
             console.log(`Record ID: ${record.id}`);
-            console.log(`Field: "Status"`);
-            console.log(`Value: "${status}"`);
+            console.log(`Fields to update:`);
+            console.log(`  - Status: "${status}"`);
+
+            const todayDate = getTodayDate();
+            console.log(`  - Last Checked: "${todayDate}"`);
 
             try {
-                // Update the Status field
-                await table.updateRecordAsync(record.id, {
-                    'Status': status
-                });
+                // Build update object with all fields
+                let updateFields = {
+                    'Status': status,
+                    'Last Checked': todayDate
+                };
+
+                // Update the record with all fields
+                await table.updateRecordAsync(record.id, updateFields);
 
                 console.log('✅✅✅ Record updated successfully!');
 

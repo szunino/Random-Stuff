@@ -51,6 +51,15 @@ function parseDate(dateString) {
     return null;
 }
 
+// Get today's date in YYYY-MM-DD format
+function getTodayDate() {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+}
+
 // Get the table
 let table = base.getTable('Licenses'); // ✏️ UPDATE THIS to match your table name
 
@@ -84,6 +93,7 @@ if (recordsToProcess.length === 0) {
     let successCount = 0;
     let failureCount = 0;
     let processedCount = 0;
+    const todayDate = getTodayDate();
 
     // Process each record
     for (let record of recordsToProcess) {
@@ -128,7 +138,8 @@ if (recordsToProcess.length === 0) {
 
                 // Build update object with all fields
                 let updateFields = {
-                    'Status': status
+                    'Status': status,
+                    'Last Checked': todayDate
                 };
 
                 if (nameOnLicense) updateFields['Name on License'] = nameOnLicense;
