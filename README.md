@@ -59,7 +59,8 @@ The script queries the [Licensy Medical Search API](https://api.medicalsearch.li
 
 ## Features
 
-- ✅ **Automatically fills 4 key fields** from API response:
+- ✅ **Automatically fills 5 key fields** from API response:
+  - **Name on License** (full name as it appears on license)
   - **Status** (Active/Inactive/Expired)
   - **Date Issued** (when license was issued)
   - **Date Expires** (expiration date)
@@ -82,6 +83,7 @@ Create a table with at least these fields:
 |------------|------------|----------|-------------|
 | State | Single line text | **Required** | State where license was issued (input) |
 | License Number | Single line text | **Required** | Medical license number (input) |
+| Name on License | Single line text | **Auto-filled** ✨ | Full name as it appears on the license |
 | Status | Single select or Single line text | **Auto-filled** ✨ | License status (Active, Inactive, Expired, etc.) |
 | Date Issued | Date | **Auto-filled** ✨ | When the license was issued |
 | Date Expires | Date | **Auto-filled** ✨ | When the license expires |
@@ -90,7 +92,7 @@ Create a table with at least these fields:
 
 **Important Notes:**
 - **You only need to fill in:** State and License Number
-- **Scripts automatically fill:** Status, Date Issued, Date Expires, License Type
+- **Scripts automatically fill:** Name on License, Status, Date Issued, Date Expires, License Type
 - For the Status field, use "Single select" with options: Active, Inactive, Expired, Unknown (or just use Single line text)
 - Date fields must be set to "Date" field type in Airtable
 - The "API Response" field is optional but useful for storing complete API response data
@@ -253,17 +255,18 @@ The API returns detailed information about medical licenses. Example response fo
 
 ```json
 {
-  "Full_Name": "Davis, Russell William",
-  "License_Type": "DO",          ← Auto-filled to "License Type"
+  "Full_Name": "Davis, Russell William",  ← Auto-filled to "Name on License"
+  "License_Type": "DO",                    ← Auto-filled to "License Type"
   "License_Number": "2143",
-  "Status": "Inactive",           ← Auto-filled to "Status"
-  "Issued": "1/22/2020",          ← Auto-filled to "Date Issued" (as 2020-01-22)
-  "Expired": "12/31/2022",        ← Auto-filled to "Date Expires" (as 2022-12-31)
+  "Status": "Inactive",                    ← Auto-filled to "Status"
+  "Issued": "1/22/2020",                   ← Auto-filled to "Date Issued" (as 2020-01-22)
+  "Expired": "12/31/2022",                 ← Auto-filled to "Date Expires" (as 2022-12-31)
   "State": "Alabama"
 }
 ```
 
 **The scripts automatically extract and store these fields in your Airtable:**
+- ✅ **Full_Name** → Name on License field
 - ✅ **Status** → Status field
 - ✅ **License_Type** → License Type field
 - ✅ **Issued** → Date Issued field (converted to YYYY-MM-DD format)

@@ -95,8 +95,10 @@ if (recordsToProcess.length === 0) {
             let dateIssued = parseDate(data.Issued);
             let dateExpires = parseDate(data.Expired);
             let licenseType = data.License_Type || null;
+            let nameOnLicense = data.Full_Name || null;
 
             // Log additional fields
+            if (nameOnLicense) console.log(`Name on License: ${nameOnLicense}`);
             if (licenseType) console.log(`License Type: ${licenseType}`);
             if (dateIssued) console.log(`Date Issued: ${dateIssued}`);
             if (dateExpires) console.log(`Date Expires: ${dateExpires}`);
@@ -106,6 +108,7 @@ if (recordsToProcess.length === 0) {
                 'Status': status
             };
 
+            if (nameOnLicense) updateFields['Name on License'] = nameOnLicense;
             if (licenseType) updateFields['License Type'] = licenseType;
             if (dateIssued) updateFields['Date Issued'] = dateIssued;
             if (dateExpires) updateFields['Date Expires'] = dateExpires;
