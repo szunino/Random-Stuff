@@ -124,6 +124,36 @@ if (recordsToProcess.length === 0) {
 
                 console.log(`  ✅ Status: ${status}`);
 
+                // Check if Status field is Single Select and validate value
+                let statusField = table.fields.find(f => f.name === 'Status');
+                if (statusField && String(statusField.type) === 'singleSelect') {
+                    const fieldOptions = statusField.options;
+                    if (fieldOptions && fieldOptions.choices && Array.isArray(fieldOptions.choices)) {
+                        let validOptions = fieldOptions.choices.map(c => c.name);
+
+                        // Check if status value is valid
+                        if (!validOptions.includes(status)) {
+                            console.log(`     ⚠️ Warning: "${status}" not in Single Select options`);
+
+                            // Try to find a matching option (case-insensitive)
+                            let matchingOption = validOptions.find(
+                                opt => opt.toLowerCase() === status.toLowerCase()
+                            );
+
+                            if (matchingOption) {
+                                status = matchingOption;
+                                console.log(`     ✅ Using matching option: "${status}"`);
+                            } else if (validOptions.includes('Unknown')) {
+                                status = 'Unknown';
+                                console.log(`     ⚠️ Using fallback: "Unknown"`);
+                            } else if (validOptions.length > 0) {
+                                status = validOptions[0];
+                                console.log(`     ⚠️ Using fallback: "${status}"`);
+                            }
+                        }
+                    }
+                }
+
                 // Parse dates from API response
                 let dateIssued = parseDate(data.Issued);
                 let dateExpires = parseDate(data.Expired);
