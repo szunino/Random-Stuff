@@ -47,9 +47,10 @@ if (statusField) {
     console.log(`\n✅ Status field found: ${statusField.name} (${statusField.type})`);
 
     // If it's a Single Select field, show the options
-    if (statusField.type === 'singleSelect' && statusField.options) {
+    const fieldOptions = (statusField as any).options;
+    if (String(statusField.type) === 'singleSelect' && fieldOptions) {
         console.log('📝 Single Select options:');
-        for (let option of statusField.options.choices) {
+        for (let option of fieldOptions.choices) {
             console.log(`  - "${option.name}"`);
         }
     }
@@ -134,8 +135,9 @@ if (recordsToProcess.length === 0) {
             console.log(`Status length: ${status.length}`);
 
             // Check if this value is valid for Single Select field
-            if (statusField && statusField.type === 'singleSelect') {
-                let validOptions = statusField.options.choices.map(c => c.name);
+            const fieldOpts = (statusField as any).options;
+            if (statusField && String(statusField.type) === 'singleSelect' && fieldOpts) {
+                let validOptions = fieldOpts.choices.map((c: any) => c.name);
                 console.log(`\n🔍 Checking if "${status}" matches any Single Select options...`);
                 console.log(`Valid options: ${validOptions.join(', ')}`);
 

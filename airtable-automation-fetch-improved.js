@@ -112,38 +112,41 @@ if (recordsToProcess.length === 0) {
             // Check if Status field is Single Select
             let statusField = table.fields.find(f => f.name === 'Status');
 
-            if (statusField && statusField.type === 'singleSelect') {
+            if (statusField && String(statusField.type) === 'singleSelect') {
                 console.log('Status field is Single Select');
 
-                // Get valid options
-                let validOptions = statusField.options.choices.map(c => c.name);
-                console.log('Valid options:', validOptions.join(', '));
+                // Get valid options (type assertion for options property)
+                const fieldOptions = (statusField as any).options;
+                if (fieldOptions && fieldOptions.choices) {
+                    let validOptions = fieldOptions.choices.map((c: any) => c.name);
+                    console.log('Valid options:', validOptions.join(', '));
 
-                // Check if status value is valid
-                if (!validOptions.includes(status)) {
-                    console.log(`⚠️ Warning: "${status}" is not a valid option`);
+                    // Check if status value is valid
+                    if (!validOptions.includes(status)) {
+                        console.log(`⚠️ Warning: "${status}" is not a valid option`);
 
-                    // Try to find a matching option (case-insensitive)
-                    let matchingOption = validOptions.find(
-                        opt => opt.toLowerCase() === status.toLowerCase()
-                    );
+                        // Try to find a matching option (case-insensitive)
+                        let matchingOption = validOptions.find(
+                            (opt: string) => opt.toLowerCase() === status.toLowerCase()
+                        );
 
-                    if (matchingOption) {
-                        console.log(`✅ Found matching option: "${matchingOption}"`);
-                        status = matchingOption;
-                    } else {
-                        console.log('❌ No matching option found, using "Unknown"');
-                        // Check if "Unknown" exists
-                        if (validOptions.includes('Unknown')) {
-                            status = 'Unknown';
-                        } else if (validOptions.length > 0) {
-                            // Use the first available option as fallback
-                            status = validOptions[0];
-                            console.log(`Using fallback option: "${status}"`);
+                        if (matchingOption) {
+                            console.log(`✅ Found matching option: "${matchingOption}"`);
+                            status = matchingOption;
                         } else {
-                            console.log('❌ ERROR: No valid options available!');
-                            output.set('status', 'Config Error');
-                            return;
+                            console.log('❌ No matching option found, using "Unknown"');
+                            // Check if "Unknown" exists
+                            if (validOptions.includes('Unknown')) {
+                                status = 'Unknown';
+                            } else if (validOptions.length > 0) {
+                                // Use the first available option as fallback
+                                status = validOptions[0];
+                                console.log(`Using fallback option: "${status}"`);
+                            } else {
+                                console.log('❌ ERROR: No valid options available!');
+                                output.set('status', 'Config Error');
+                                return;
+                            }
                         }
                     }
                 }
