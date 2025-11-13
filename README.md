@@ -88,13 +88,17 @@ Create a table with at least these fields:
 | Date Issued | Date | **Auto-filled** ✨ | When the license was issued |
 | Date Expires | Date | **Auto-filled** ✨ | When the license expires |
 | License Type | Single line text | **Auto-filled** ✨ | Type of license (DO, MD, etc.) |
+| Last Checked | Date | **Auto-filled** ✨ | Date when information was last updated |
+| Manual Update | Button | Optional | Button to trigger manual updates (for extensions) |
 | API Response | Long text | Optional | Stores full API response data |
 
 **Important Notes:**
 - **You only need to fill in:** State and License Number
-- **Scripts automatically fill:** Name on License, Status, Date Issued, Date Expires, License Type
+- **Scripts automatically fill:** Name on License, Status, Date Issued, Date Expires, License Type, Last Checked
 - For the Status field, use "Single select" with options: Active, Inactive, Expired, Unknown (or just use Single line text)
 - Date fields must be set to "Date" field type in Airtable
+- The "Last Checked" field tracks when the data was last refreshed
+- The "Manual Update" button field is optional and used with extension scripts
 - The "API Response" field is optional but useful for storing complete API response data
 
 ### 2. Install the Script
@@ -137,21 +141,26 @@ For automatic license status updates, use the automation scripts instead of manu
 
 ### Available Files
 
-| File | Use Case | Requires | Output |
-|------|----------|----------|--------|
-| `airtable-diagnostic-check.js` | Check which HTTP functions are available | Nothing | Environment report |
-| `airtable-automation-fetch-version.js` | Auto-update per record (uses fetch) | `fetch()` | Status value |
-| `airtable-automation-fetch-improved.js` | Auto-update with better Single Select handling | `fetch()` | Status value |
-| `airtable-automation-fetch-debug.js` | **Debug version** - Extensive logging | `fetch()` | Status value + logs |
-| `airtable-automation-simple-trigger.js` | Auto-update per record (no input config) | `remoteFetchAsync` | Status value |
-| `airtable-automation-license-status.js` | Auto-update per record (with input config) | `remoteFetchAsync` | Status value |
-| `airtable-automation-daily-batch.js` | Daily scheduled run for all records | `remoteFetchAsync` | Summary message |
-| `airtable-medical-license-lookup.js` | Manual interactive script | `remoteFetchAsync` | Full details |
-| `airtable-medical-license-lookup-simple.js` | Manual batch processing | `remoteFetchAsync` | All records |
+| File | Type | Use Case | Requires | Output |
+|------|------|----------|----------|--------|
+| `airtable-diagnostic-check.js` | Diagnostic | Check which HTTP functions are available | Nothing | Environment report |
+| `airtable-automation-fetch-version.js` | Automation | Auto-update per record (uses fetch) | `fetch()` | Status value |
+| `airtable-automation-fetch-batch.js` | Automation | Batch process all empty records | `fetch()` | Summary + counts |
+| `airtable-automation-fetch-improved.js` | Automation | Auto-update with Single Select handling | `fetch()` | Status value |
+| `airtable-automation-fetch-debug.js` | Debug | **Debug version** - Extensive logging | `fetch()` | Status value + logs |
+| `airtable-automation-simple-trigger.js` | Automation | Auto-update per record (no input config) | `remoteFetchAsync` | Status value |
+| `airtable-automation-license-status.js` | Automation | Auto-update per record (with input config) | `remoteFetchAsync` | Status value |
+| `airtable-automation-daily-batch.js` | Automation | Daily scheduled run for all records | `remoteFetchAsync` | Summary message |
+| `airtable-extension-manual-update.js` | **Extension** | **Manual update - single record** | `fetch()` | Interactive UI |
+| `airtable-extension-manual-update-batch.js` | **Extension** | **Manual update - multiple records** | `fetch()` | Interactive UI |
+| `airtable-medical-license-lookup.js` | Extension | Manual interactive script | `remoteFetchAsync` | Full details |
+| `airtable-medical-license-lookup-simple.js` | Extension | Manual batch processing | `remoteFetchAsync` | All records |
 
 **💡 Pro Tips:**
 - If you see `remoteFetchAsync is not defined` errors, use `airtable-automation-fetch-version.js`
 - **If Status isn't being written to cells**, use `airtable-automation-fetch-debug.js` to diagnose the issue
+- **For manual on-demand updates**, use the extension scripts (`airtable-extension-manual-update*.js`)
+- **Extension scripts set "Last Checked" date** automatically
 - See **[STATUS-NOT-WRITING-TROUBLESHOOTING.md](STATUS-NOT-WRITING-TROUBLESHOOTING.md)** for detailed troubleshooting
 
 ### Option 1: Automatic Status Update (Per Record)
@@ -215,6 +224,67 @@ For automatic license status updates, use the automation scripts instead of manu
 - ✅ You can use both automations together
 - ✅ Set Status field to empty if you want to re-run the lookup
 - ⚠️ Automations run automatically - no user confirmation needed
+
+## Manual Update (Extension Scripts)
+
+For on-demand updates when you need to refresh specific records manually.
+
+### Option 3: Extension Script for Manual Updates
+
+**Use this when you want to manually refresh license data for specific records**
+
+#### Single Record Update
+
+**File:** `airtable-extension-manual-update.js`
+
+**Setup:**
+1. In your Airtable base, click "Extensions" (puzzle piece icon)
+2. Click "+ Add an extension"
+3. Choose "Scripting"
+4. Paste the contents of `airtable-extension-manual-update.js`
+5. Update table name on line 30 if needed
+
+**How to use:**
+1. Select a record in your table
+2. Open the Scripting Extension
+3. Click "Run"
+4. The script will fetch fresh data and update all fields
+5. Sets "Last Checked" to today's date
+
+**Perfect for:**
+- Manually refreshing expired or questionable data
+- Updating a single record that failed in automation
+- On-demand verification of license status
+
+#### Batch Manual Update
+
+**File:** `airtable-extension-manual-update-batch.js`
+
+**Setup:**
+1. Same as single record update (steps above)
+2. Paste `airtable-extension-manual-update-batch.js` instead
+
+**How to use:**
+1. Select multiple records in your table (or select none to process all)
+2. Open the Scripting Extension
+3. Click "Run"
+4. Choose "Selected Records" or "All Records"
+5. Watch progress as each record is updated
+6. All records get "Last Checked" set to today's date
+
+**Perfect for:**
+- Refreshing a batch of licenses before renewal season
+- Updating all records after API data changes
+- Periodic manual verification of license statuses
+
+### Manual Update Benefits
+
+✅ **On-demand** - Run whenever you want
+✅ **Selective** - Update only the records you choose
+✅ **Visible progress** - See results as they happen
+✅ **Last Checked tracking** - Know when data was refreshed
+✅ **No automation limits** - Doesn't count against automation runs
+✅ **Interactive** - See exactly what changed
 
 ## API Configuration
 
